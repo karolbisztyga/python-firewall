@@ -4,3 +4,6 @@ class Packet:
         self.source_ip = source_ip
         self.dest_port = dest_port
         self.time = time
+
+    def __str__(self):
+        return 'packet from ip' + str(self.source_ip) + ' to port ' + str(self.dest_port) + ', time received: ' + str(self.time)
