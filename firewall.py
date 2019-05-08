@@ -4,9 +4,10 @@ from blocker import Blocker
 
 class Firewall:
 
-    def __init__(self):
+    def __init__(self, my_ip):
+        self.__my_ip = my_ip
         self.__state = State.STOPPED
-        self.__sniffer = Sniffer()
+        self.__sniffer = Sniffer(my_ip)
         self.__blocker = Blocker()
 
     def start(self):

@@ -8,10 +8,11 @@ from packet import Packet
 
 class Sniffer:
 
-    def __init__(self):
+    def __init__(self, my_ip):
         self.__sniff_count = 1
         self.__state = State.STOPPED
         self.__thread = None
+        self.__my_ip = my_ip
 
     def start(self):
         self.__state = State.RUNNING
@@ -35,6 +36,8 @@ class Sniffer:
         if source_ip is None:
             return
         time_received = time.time()
+        if source_ip == self.__my_ip:
+            return
         packet = Packet(source_ip, dest_port, time_received)
         print('[*] sniffer got a packet from ip ' + str(source_ip) + ' to port ' + str(dest_port))
 
