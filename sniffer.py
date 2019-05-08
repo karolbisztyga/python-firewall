@@ -8,13 +8,13 @@ from packet import Packet
 
 class Sniffer:
 
-    def __init__(self, my_ip):
+    def __init__(self, blocker, my_ip):
         self.__sniff_count = 1
         self.__state = State.STOPPED
         self.__thread = None
         self.__my_ip = my_ip
-        self.__packets = dict()
         self.__packet_count = 0
+        self.__blocker = blocker
 
     def start(self):
         self.__state = State.RUNNING
@@ -48,9 +48,10 @@ class Sniffer:
             return
         packet = Packet(source_ip, dest_port, time_received)
         self.__packet_count += 1
-        if source_ip not in self.__packets:
-            self.__packets[source_ip] = []
-        self.__packets[source_ip].append(packet)
+        #if source_ip not in self.__packets:
+        #    self.__packets[source_ip] = []
+        #self.__packets[source_ip].append(packet)
+        self.__blocker.check(packet)
         print('[*] sniffer got a packet from ip ' + str(source_ip) + ' to port ' + str(dest_port) + ', current packets received: ' + str(self.__packet_count))
 
 
