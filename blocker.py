@@ -71,7 +71,7 @@ class Blocker:
                 else:
                     pass  # min time should be reset here
 
-            return result
+        return result
 
     def __check_brute_force_auth(self, packets):
         return False
