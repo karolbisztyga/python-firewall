@@ -17,7 +17,13 @@ class Blocker:
         # for how many seconds the address will remain blocked
         # None value however means permanent ban
         self.__penalty_seconds = 5
-
+		
+		# ------- DOS ---------
+		# minimum number of packets that have to be received to consider denial of service attack
+		self.__dos_packet_qualifier = 1000
+		# time window in seconds taken into account while considering amount of packages received while checking dos attack
+		self.__dos_time_qualifier = 100
+		
     # check for threats
     def check(self, new_packet):
         if new_packet.source_ip not in self.__packets:
@@ -45,7 +51,26 @@ class Blocker:
         return len(ports) >= self.__port_scanning_minimum_limit
 
     def __check_dos(self, packets):
-        return False
+		result = False
+
+        print('[*] checking for denial of service threat from ip ' + str(packets[0].source_ip))
+        ports = dict()
+        for packet in packets:
+            port = packet.dest_port
+            if port not in ports:
+				ports[port] = []
+			ports[port].append(packet)
+		
+		for _,pckts in ports.items():
+			if len(pckts) > self.__dos_packet_qualifier:
+				max_time = max(p.time for p in pckts)
+				min_time = min(p.time for p in pckts)
+				if (max_time - min_time) < self.__dos_time_qualifier:
+					result = True
+				else:
+					pass # min time should be reset here #
+			
+        return result
 
     def __check_brute_force_auth(self, packets):
         return False
