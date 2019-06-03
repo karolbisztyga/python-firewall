@@ -13,15 +13,15 @@ def help(firewall):
 
 def run():
     # check internet connection and obtain my ip
-    my_ip = None
-    try:
+    my_ip = '192.168.185.3'
+    '''try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
         my_ip = s.getsockname()[0]
         s.close()
     except OSError:
         print('[!] you have no internet connection, exiting')
-        exit(1)
+        exit(1)'''
     if my_ip is None:
         print('[!] unspecified error, exiting')
         exit(1)

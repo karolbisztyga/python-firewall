@@ -11,7 +11,9 @@ class Blocker:
         self.__blacklist = []
         self.__packets = dict()
         # minimum packets that have to be received to consider certain ip as malicious
-        self.__threat_minimum_packets = 10
+        self.__threat_minimum_packets = 0
+
+        # ------- port scanning ---------
         # when this value or more ports has been scanned in short period then it is considered as a threat
         self.__port_scanning_minimum_limit = 10
         # for how many seconds the address will remain blocked
@@ -24,6 +26,14 @@ class Blocker:
         # time window in seconds taken into account while considering
         # amount of packages received while checking dos attack
         self.__dos_time_qualifier = 100
+
+        # ------- auth ---------
+        self.__ssh_port = 22
+        self.__auth_sys_file = '/var/log/auth.log'
+        self.__auth_penalty_limit = 5
+
+        # reset auth sys file
+        self.__reset_auth_sys_file()
 
     # check for threats
     def check(self, new_packet):
@@ -74,7 +84,19 @@ class Blocker:
         return result
 
     def __check_brute_force_auth(self, packets):
-        return False
+        print('[*] checking for brute force auth threat from ip ' + str(packets[0].source_ip))
+        failures = {}
+        with open(self.__auth_sys_file) as file:
+            for line in file.readlines():
+                if 'Failed password' in line:
+                    ip = line.split(' from ')[1].split(' ')[0]
+                    if ip not in failures:
+                        failures[ip] = 1
+                    else:
+                        failures[ip] += 1
+        for ip, attempts in failures.items():
+            if attempts > self.__auth_penalty_limit:
+                self.block_ip(ip, 'brute force auth')
 
     def block_ip(self, ip, attack):
         if ip in self.__blacklist:
@@ -100,7 +122,19 @@ class Blocker:
         subprocess.Popen(['service', 'iptables', 'save'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.__packets[ip] = []
         self.__blacklist.remove(ip)
+        lines = None
+        with open(self.__auth_sys_file, 'r') as file:
+            lines = file.readlines()
+        with open(self.__auth_sys_file, 'w') as file:
+            for line in lines:
+                if ip not in line:
+                    file.write(line)
+
 
     def unblock_all(self):
         for ip in self.__blacklist:
             self.__unblock_ip(ip)
+
+    def __reset_auth_sys_file(self):
+        with open(self.__auth_sys_file, 'w') as file:
+            pass

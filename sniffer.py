@@ -46,7 +46,7 @@ class Sniffer:
         time_received = time.time()
         if source_ip == self.__my_ip or source_ip is None:
             return
-        packet = Packet(source_ip, dest_port, time_received)
+        packet = Packet(source_ip, dest_port, time_received, pkt)
         self.__packet_count += 1
         #if source_ip not in self.__packets:
         #    self.__packets[source_ip] = []
