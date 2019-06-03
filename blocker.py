@@ -19,6 +19,7 @@ class Blocker:
         # for how many seconds the address will remain blocked
         # None value however means permanent ban
         self.__penalty_seconds = 5
+        self.__dos_time_window = dict()
 
         # ------- DOS ---------
         # minimum number of packets that have to be received to consider denial of service attack
@@ -73,13 +74,31 @@ class Blocker:
             ports[port].append(packet)
 
         for _, pckts in ports.items():
-            if len(pckts) > self.__dos_packet_qualifier:
+            packet_counter = 0
+            if pckts[0].source_ip in self.__dos_time_window and pckts[0].dest_port in self.__dos_time_window[pckts[0].source_ip]:
+                min_time = self.__dos_time_window[pckts[0].source_ip][pckts[0].dest_port]
+                for p in pckts:
+                    if p.time > min_time:
+                        packet_counter += 1
+            else:
+                packet_counter = len(pckts)
+
+            if packet_counter > self.__dos_packet_qualifier:
                 max_time = max(p.time for p in pckts)
-                min_time = min(p.time for p in pckts)
+
+                if pckts[0].source_ip in self.__dos_time_window and pckts[0].dest_port in self.__dos_time_window[pckts[0].source_ip]:
+                    min_time = self.__dos_time_window[pckts[0].source_ip][pckts[0].dest_port]
+                else:
+                    min_time = min(p.time for p in pckts)
+
                 if (max_time - min_time) < self.__dos_time_qualifier:
                     result = True
+                    break
                 else:
-                    pass  # min time should be reset here
+                    if pckts[0].source_ip not in self.__dos_time_window:
+                        self.__dos_time_window[pckts[0].source_ip] = dict()
+
+                    self.__dos_time_window[pckts[0].source_ip][pckts[0].dest_port] = max_time
 
         return result
 
