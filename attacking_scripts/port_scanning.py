@@ -1,6 +1,6 @@
 import socket
 
-target_ip = None
+target_ip = '192.168.185.3'
 
 if target_ip is None:
     exit(1)

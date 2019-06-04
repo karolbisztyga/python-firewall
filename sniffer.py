@@ -52,6 +52,6 @@ class Sniffer:
         #    self.__packets[source_ip] = []
         #self.__packets[source_ip].append(packet)
         self.__blocker.check(packet)
-        print('[*] sniffer got a packet from ip ' + str(source_ip) + ' to port ' + str(dest_port) + ', current packets received: ' + str(self.__packet_count))
+        # print('[*] sniffer got a packet from ip ' + str(source_ip) + ' to port ' + str(dest_port) + ', current packets received: ' + str(self.__packet_count))
 
 

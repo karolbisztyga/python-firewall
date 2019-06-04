@@ -23,10 +23,10 @@ class Blocker:
 
         # ------- DOS ---------
         # minimum number of packets that have to be received to consider denial of service attack
-        self.__dos_packet_qualifier = 1000
+        self.__dos_packet_qualifier = 3
         # time window in seconds taken into account while considering
         # amount of packages received while checking dos attack
-        self.__dos_time_qualifier = 100
+        self.__dos_time_qualifier = 10000
 
         # ------- auth ---------
         self.__ssh_port = 22
@@ -54,7 +54,7 @@ class Blocker:
     def __check_port_scanning(self, packets):
         if len(packets) < self.__port_scanning_minimum_limit:
             return False
-        print('[*] checking for port scanning threat from ip ' + str(packets[0].source_ip))
+        # print('[*] checking for port scanning threat from ip ' + str(packets[0].source_ip))
         ports = []
         for packet in packets:
             port = packet.dest_port
@@ -65,7 +65,7 @@ class Blocker:
     def __check_dos(self, packets):
         result = False
 
-        print('[*] checking for denial of service threat from ip ' + str(packets[0].source_ip))
+        # print('[*] checking for denial of service threat from ip ' + str(packets[0].source_ip))
         ports = dict()
         for packet in packets:
             port = packet.dest_port
@@ -103,7 +103,7 @@ class Blocker:
         return result
 
     def __check_brute_force_auth(self, packets):
-        print('[*] checking for brute force auth threat from ip ' + str(packets[0].source_ip))
+        # print('[*] checking for brute force auth threat from ip ' + str(packets[0].source_ip))
         failures = {}
         with open(self.__auth_sys_file) as file:
             for line in file.readlines():
@@ -122,7 +122,7 @@ class Blocker:
             return
         self.__blacklist.append(ip)
         blocking_thread = Thread(target=self.__block_ip, args=(ip,), daemon=True)
-        print('[*] ip ' + str(ip) + ' being blocked due to ' + str(attack) + ' attack')
+        print('     [!!!] ip ' + str(ip) + ' being blocked due to ' + str(attack) + ' attack [!!!]')
         blocking_thread.start()
 
     def __block_ip(self, ip):
@@ -133,7 +133,7 @@ class Blocker:
             time.sleep(self.__penalty_seconds)
             # unblock
             self.__unblock_ip(ip)
-            print('[*] ip ' + str(ip) + ' unblocked after penalty of ' + str(self.__penalty_seconds) + ' seconds')
+            print('     [!!!] ip ' + str(ip) + ' unblocked after penalty of ' + str(self.__penalty_seconds) + ' seconds [!!!]')
 
     def __unblock_ip(self, ip):
         print('[*] unblocking ip ' + str(ip))
